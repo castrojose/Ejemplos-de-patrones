@@ -67,3 +67,10 @@ public class ProgramaVentaCarros
         ventasCarros.MostrarVentas();
     }
 }
+```
+
+Explicación:
+
+    Singleton (VentaCarrosSingleton): Se asegura de que solo haya una única instancia que maneje las ventas de carros. Esto se logra usando un constructor privado y un método estático para acceder a la instancia.
+    Registro de Ventas: Puedes registrar las ventas de los autos usando el método RegistrarVenta().
+    Mostrar Ventas: El método MostrarVentas() imprime todas las ventas registradas hasta el momento.
