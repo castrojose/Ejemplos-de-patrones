@@ -580,3 +580,294 @@ Auto (Producto): La clase Auto representa el objeto que queremos clonar. Impleme
 PrototipoAutos (Clase que maneja prototipos): Esta clase tiene instancias iniciales de autos (un Toyota Corolla y un Honda Civic), y expone métodos para obtener clones de estos prototipos.
 Clonación y Personalización: Cuando llamas a ObtenerPrototipoToyota() o ObtenerPrototipoHonda(), obtienes una copia del prototipo original. Luego, puedes modificar las propiedades del clon sin afectar al prototipo original.
 Cliente (ProgramaVentaCarros): El cliente usa los prototipos para clonar autos, personalizarlos y mostrarlos. Cada clon puede ser modificado de forma independiente sin afectar los prototipos originales.
+
+
+# Adapter
+```C#
+    using System;
+
+// Sistema antiguo (Incompatible con el nuevo sistema de ventas)
+public class InventarioAntiguo
+{
+    public string ObtenerDetallesDelAuto()
+    {
+        return "Modelo: Toyota Corolla, Año: 2024, Motor: 1.8L, Transmisión: Automática CVT, Color: Blanco";
+    }
+}
+
+// Interfaz esperada por el nuevo sistema de ventas
+public interface IAuto
+{
+    void MostrarDetalles();
+}
+
+// Adaptador que convierte el formato del InventarioAntiguo al formato del nuevo sistema
+public class AdaptadorInventario : IAuto
+{
+    private InventarioAntiguo _inventarioAntiguo;
+
+    // El adaptador toma una instancia del inventario antiguo
+    public AdaptadorInventario(InventarioAntiguo inventarioAntiguo)
+    {
+        _inventarioAntiguo = inventarioAntiguo;
+    }
+
+    // Implementa el método MostrarDetalles requerido por el nuevo sistema
+    public void MostrarDetalles()
+    {
+        string detalles = _inventarioAntiguo.ObtenerDetallesDelAuto();
+        Console.WriteLine("Detalles del auto adaptados desde el sistema antiguo:");
+        Console.WriteLine(detalles);
+    }
+}
+
+// Nuevo sistema de ventas que espera un IAuto compatible
+public class SistemaDeVentas
+{
+    public void VenderAuto(IAuto auto)
+    {
+        Console.WriteLine("Realizando la venta del siguiente auto:");
+        auto.MostrarDetalles();
+        Console.WriteLine("Venta realizada exitosamente.");
+    }
+}
+
+// Cliente
+public class ProgramaVentaCarros
+{
+    public static void Main()
+    {
+        // Crear una instancia del inventario antiguo
+        InventarioAntiguo inventarioAntiguo = new InventarioAntiguo();
+
+        // Crear el adaptador para hacer compatible el inventario antiguo con el nuevo sistema
+        IAuto autoAdaptado = new AdaptadorInventario(inventarioAntiguo);
+
+        // Usar el nuevo sistema de ventas con el auto adaptado
+        SistemaDeVentas sistemaDeVentas = new SistemaDeVentas();
+        sistemaDeVentas.VenderAuto(autoAdaptado);
+    }
+}
+
+```
+Explicación:
+
+InventarioAntiguo (Sistema Antiguo): Este representa el sistema viejo de inventario, el cual tiene un método ObtenerDetallesDelAuto() 
+que devuelve los detalles del auto en un formato de texto. Este sistema no es compatible directamente con el nuevo sistema de ventas.
+IAuto (Interfaz del Nuevo Sistema): El nuevo sistema de ventas espera que los autos implementen la interfaz IAuto, que tiene el método MostrarDetalles().
+AdaptadorInventario (Adaptador): Este es el adaptador que toma una instancia del inventario antiguo y la adapta para que sea compatible con el nuevo sistema. 
+Implementa la interfaz IAuto y adapta el método ObtenerDetallesDelAuto() para que funcione con MostrarDetalles().
+
+# Bridge
+```C#
+    using System;
+
+// Implementador (la parte que cambiará de manera independiente)
+public interface IMarca
+{
+    void MostrarDetallesMarca();
+}
+
+// Implementadores concretos (marcas específicas)
+public class Toyota : IMarca
+{
+    public void MostrarDetallesMarca()
+    {
+        Console.WriteLine("Marca: Toyota");
+    }
+}
+
+public class Honda : IMarca
+{
+    public void MostrarDetallesMarca()
+    {
+        Console.WriteLine("Marca: Honda");
+    }
+}
+
+// Abstracción (tipo de auto)
+public abstract class TipoAuto
+{
+    protected IMarca _marca;
+
+    // El constructor recibe una implementación de marca
+    protected TipoAuto(IMarca marca)
+    {
+        _marca = marca;
+    }
+
+    public abstract void MostrarDetalles();
+}
+
+// Refined Abstraction (Tipos concretos de autos)
+public class Sedan : TipoAuto
+{
+    public Sedan(IMarca marca) : base(marca)
+    {
+    }
+
+    public override void MostrarDetalles()
+    {
+        Console.WriteLine("Tipo de auto: Sedán");
+        _marca.MostrarDetallesMarca();
+    }
+}
+
+public class SUV : TipoAuto
+{
+    public SUV(IMarca marca) : base(marca)
+    {
+    }
+
+    public override void MostrarDetalles()
+    {
+        Console.WriteLine("Tipo de auto: SUV");
+        _marca.MostrarDetallesMarca();
+    }
+}
+
+// Cliente
+public class ProgramaVentaCarros
+{
+    public static void Main()
+    {
+        // Crear un sedán Toyota
+        TipoAuto sedanToyota = new Sedan(new Toyota());
+        Console.WriteLine("Detalles del auto:");
+        sedanToyota.MostrarDetalles();
+
+        Console.WriteLine();
+
+        // Crear un SUV Honda
+        TipoAuto suvHonda = new SUV(new Honda());
+        Console.WriteLine("Detalles del auto:");
+        suvHonda.MostrarDetalles();
+    }
+}
+```
+Explicación:
+IMarca (Implementador): Esta es la interfaz que define los métodos que las marcas de autos deben implementar. En este caso, MostrarDetallesMarca() es el método que cada marca concreta debe implementar.
+
+ Toyota y Honda (Implementadores Concretos): Estas clases representan marcas de autos específicas (Toyota y Honda) y proporcionan su propia implementación de MostrarDetallesMarca().
+
+TipoAuto (Abstracción): Es la clase abstracta que representa el tipo de auto (Sedán, SUV, etc.). Está compuesta por un objeto IMarca, que permite que el tipo de auto trabaje con diferentes marcas sin necesidad de conocer los detalles de cada implementación de marca.
+
+Sedan y SUV (Refined Abstractions): Estas son clases concretas que extienden TipoAuto, cada una representando un tipo específico de auto (Sedán o SUV). Cada una usa la marca proporcionada en el constructor y muestra los detalles del auto.
+
+Cliente (ProgramaVentaCarros): El cliente crea diferentes tipos de autos (Sedán y SUV) con diferentes marcas (Toyota y Honda), mostrando cómo el patrón Bridge permite combinar diferentes tipos y marcas sin necesidad de crear clases separadas para cada combinación.
+ SistemaDeVentas (Cliente): El nuevo sistema de ventas, que trabaja con autos compatibles con la interfaz IAuto, realiza la venta de un auto adaptado desde el inventario antiguo.
+
+ # Composite
+ ```C#
+    using System;
+using System.Collections.Generic;
+
+// Componente (Define la interfaz común para los objetos individuales y compuestos)
+public abstract class ComponenteAuto
+{
+    public abstract void MostrarDetalles();
+}
+
+// Hoja (Auto individual)
+public class Auto : ComponenteAuto
+{
+    private string _modelo;
+    private string _marca;
+    private double _precio;
+
+    public Auto(string modelo, string marca, double precio)
+    {
+        _modelo = modelo;
+        _marca = marca;
+        _precio = precio;
+    }
+
+    // Implementación del método para mostrar los detalles de un auto
+    public override void MostrarDetalles()
+    {
+        Console.WriteLine($"Auto: {_marca} {_modelo}, Precio: {_precio:C}");
+    }
+}
+
+// Compuesto (Categoría que contiene varios autos o subcategorías)
+public class CategoriaAuto : ComponenteAuto
+{
+    private string _nombreCategoria;
+    private List<ComponenteAuto> _componentes = new List<ComponenteAuto>();
+
+    public CategoriaAuto(string nombreCategoria)
+    {
+        _nombreCategoria = nombreCategoria;
+    }
+
+    // Añadir componente (puede ser un auto o una subcategoría)
+    public void Agregar(ComponenteAuto componente)
+    {
+        _componentes.Add(componente);
+    }
+
+    // Remover componente
+    public void Remover(ComponenteAuto componente)
+    {
+        _componentes.Remove(componente);
+    }
+
+    // Implementación del método para mostrar los detalles de la categoría y sus autos
+    public override void MostrarDetalles()
+    {
+        Console.WriteLine($"Categoría: {_nombreCategoria}");
+        foreach (var componente in _componentes)
+        {
+            componente.MostrarDetalles();
+        }
+    }
+}
+
+// Cliente
+public class ProgramaVentaCarros
+{
+    public static void Main()
+    {
+        // Crear autos individuales (hojas)
+        ComponenteAuto toyotaCorolla = new Auto("Corolla", "Toyota", 20000);
+        ComponenteAuto hondaCivic = new Auto("Civic", "Honda", 22000);
+        ComponenteAuto fordExplorer = new Auto("Explorer", "Ford", 35000);
+        ComponenteAuto jeepWrangler = new Auto("Wrangler", "Jeep", 40000);
+
+        // Crear categorías (compuestos)
+        CategoriaAuto categoriaSedanes = new CategoriaAuto("Sedanes");
+        categoriaSedanes.Agregar(toyotaCorolla);
+        categoriaSedanes.Agregar(hondaCivic);
+
+        CategoriaAuto categoriaSUVs = new CategoriaAuto("SUVs");
+        categoriaSUVs.Agregar(fordExplorer);
+        categoriaSUVs.Agregar(jeepWrangler);
+
+        // Crear un catálogo general que contiene todas las categorías
+        CategoriaAuto catalogoAutos = new CategoriaAuto("Catálogo de Autos");
+        catalogoAutos.Agregar(categoriaSedanes);
+        catalogoAutos.Agregar(categoriaSUVs);
+
+        // Mostrar los detalles del catálogo completo
+        Console.WriteLine("Detalles del catálogo completo:");
+        catalogoAutos.MostrarDetalles();
+    }
+}
+```
+Explicación:
+
+ComponenteAuto (Componente): Esta es la clase abstracta que define la interfaz común para todos los objetos en la jerarquía. En este caso, tiene el método MostrarDetalles(), que será implementado por las clases de hoja y compuesto.
+
+Auto (Hoja): Representa los objetos individuales (autos específicos) que no tienen otros componentes hijos. Implementa el método MostrarDetalles() para mostrar la información del auto individual (marca, modelo, precio).
+
+CategoriaAuto (Compuesto): Representa los objetos compuestos (categorías) que pueden contener otros componentes (autos o subcategorías). Implementa MostrarDetalles() para mostrar los detalles de la categoría y recorre recursivamente los componentes hijos (autos o subcategorías).
+
+Cliente (ProgramaVentaCarros): El cliente crea autos individuales y categorías de autos (como Sedanes y SUVs) y los organiza en un catálogo. Al final, puede tratar tanto autos individuales como categorías de autos de manera uniforme usando el mismo método MostrarDetalles().Explicación:
+
+ComponenteAuto (Componente): Esta es la clase abstracta que define la interfaz común para todos los objetos en la jerarquía. En este caso, tiene el método MostrarDetalles(), que será implementado por las clases de hoja y compuesto.
+
+Auto (Hoja): Representa los objetos individuales (autos específicos) que no tienen otros componentes hijos. Implementa el método MostrarDetalles() para mostrar la información del auto individual (marca, modelo, precio).
+
+CategoriaAuto (Compuesto): Representa los objetos compuestos (categorías) que pueden contener otros componentes (autos o subcategorías). Implementa MostrarDetalles() para mostrar los detalles de la categoría y recorre recursivamente los componentes hijos (autos o subcategorías).
+
+Cliente (ProgramaVentaCarros): El cliente crea autos individuales y categorías de autos (como Sedanes y SUVs) y los organiza en un catálogo. Al final, puede tratar tanto autos individuales como categorías de autos de manera uniforme usando el mismo método MostrarDetalles().
