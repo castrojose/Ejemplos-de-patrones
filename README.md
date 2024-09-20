@@ -75,7 +75,7 @@ Singleton (VentaCarrosSingleton): Se asegura de que solo haya una única instanc
 Registro de Ventas: Puedes registrar las ventas de los autos usando el método RegistrarVenta().
 Mostrar Ventas: El método MostrarVentas() imprime todas las ventas registradas hasta el momento.
 
-#Factory Method
+# Factory Method
 
 ```C#
     using System;
@@ -478,3 +478,105 @@ AutoBuilder (Builder Abstracto): Define los métodos abstractos que los "builder
 ToyotaCorollaBuilder y HondaCivicBuilder (Builders Concretos): Implementan el proceso de construcción para los autos específicos, estableciendo el modelo, motor, transmisión y color.
 Director: Controla el proceso de construcción. Llama a los métodos del builder concreto en el orden correcto para construir el auto.
 ProgramaVentaCarros (Cliente): Es el cliente que usa el director para construir diferentes autos (en este caso, un Toyota Corolla y un Honda Civic).
+
+# Prototype
+
+```C#
+    using System;
+
+// Clase Auto que implementa la interfaz ICloneable para habilitar la clonación
+public class Auto : ICloneable
+{
+    public string Modelo { get; set; }
+    public string Motor { get; set; }
+    public string Transmision { get; set; }
+    public string Color { get; set; }
+
+    public Auto(string modelo, string motor, string transmision, string color)
+    {
+        Modelo = modelo;
+        Motor = motor;
+        Transmision = transmision;
+        Color = color;
+    }
+
+    // Implementación del método Clone
+    public object Clone()
+    {
+        // Crea una copia superficial del objeto Auto
+        return this.MemberwiseClone();
+    }
+
+    public void MostrarDetalles()
+    {
+        Console.WriteLine($"Modelo: {Modelo}");
+        Console.WriteLine($"Motor: {Motor}");
+        Console.WriteLine($"Transmisión: {Transmision}");
+        Console.WriteLine($"Color: {Color}");
+    }
+}
+
+// Prototipos concretos para autos específicos
+public class PrototipoAutos
+{
+    private Auto _toyotaCorolla;
+    private Auto _hondaCivic;
+
+    public PrototipoAutos()
+    {
+        // Creación de prototipos iniciales
+        _toyotaCorolla = new Auto("Toyota Corolla", "1.8L 4 cilindros", "Automática CVT", "Blanco");
+        _hondaCivic = new Auto("Honda Civic", "2.0L 4 cilindros", "Manual 6 velocidades", "Negro");
+    }
+
+    // Obtener una copia del prototipo del Toyota Corolla
+    public Auto ObtenerPrototipoToyota()
+    {
+        return (Auto)_toyotaCorolla.Clone();
+    }
+
+    // Obtener una copia del prototipo del Honda Civic
+    public Auto ObtenerPrototipoHonda()
+    {
+        return (Auto)_hondaCivic.Clone();
+    }
+}
+
+// Cliente
+public class ProgramaVentaCarros
+{
+    public static void Main()
+    {
+        // Crear el almacén de prototipos
+        PrototipoAutos prototipoAutos = new PrototipoAutos();
+
+        // Clonar y modificar un Toyota Corolla
+        Auto toyota1 = prototipoAutos.ObtenerPrototipoToyota();
+        toyota1.Color = "Rojo";  // Cambiar color del clon
+        Console.WriteLine("Detalles del Toyota Corolla (clon modificado):");
+        toyota1.MostrarDetalles();
+
+        Console.WriteLine();
+
+        // Clonar y modificar un Honda Civic
+        Auto honda1 = prototipoAutos.ObtenerPrototipoHonda();
+        honda1.Motor = "1.5L Turbo";  // Cambiar motor del clon
+        Console.WriteLine("Detalles del Honda Civic (clon modificado):");
+        honda1.MostrarDetalles();
+
+        Console.WriteLine();
+
+        // Clonar otro Toyota Corolla sin modificar
+        Auto toyota2 = prototipoAutos.ObtenerPrototipoToyota();
+        Console.WriteLine("Detalles del Toyota Corolla (otro clon):");
+        toyota2.MostrarDetalles();
+    }
+}
+```
+
+Explicación:
+
+Auto (Producto): La clase Auto representa el objeto que queremos clonar. Implementa la interfaz ICloneable y tiene un método Clone() que realiza una clonación superficial del objeto usando MemberwiseClone().
+PrototipoAutos (Clase que maneja prototipos): Esta clase tiene instancias iniciales de autos (un Toyota Corolla y un Honda Civic), y expone métodos para obtener clones de estos prototipos.
+Clonación y Personalización: Cuando llamas a ObtenerPrototipoToyota() o ObtenerPrototipoHonda(), obtienes una copia del prototipo original. Luego, puedes modificar las propiedades del clon sin afectar al prototipo original.
+Cliente (ProgramaVentaCarros): El cliente usa los prototipos para clonar autos, personalizarlos y mostrarlos. Cada clon puede ser modificado de forma independiente sin afectar los prototipos originales.
